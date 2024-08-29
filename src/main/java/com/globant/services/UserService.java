@@ -1,6 +1,7 @@
 package com.globant.services;
 
 import com.globant.model.User;
+import com.globant.model.exceptions.InvalidInputException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,18 +27,9 @@ public class UserService {
     }
     //Validating mail and password
     public boolean userValidator(String mail, String password){
-        User user = findUser(mail);
-        return user != null && user.getPassword().equals(password);
+            User user = findUser(mail);
+            return user != null && user.getPassword().equals(password);
+        }
     }
 
-    public String getInfo(User user){
-        return "User{" +
-                "name='" + user.getName() + '\'' +
-                ", mail='" + user.getMail() + '\'' +
-                ", password='" + user.getPassword() + '\'' +
-                ", username='" +  user.getUsername() +
-                ", wallet=" + user.getWallet() +
-                '}';
-    }
 
-}
