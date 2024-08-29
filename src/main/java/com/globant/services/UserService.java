@@ -29,4 +29,15 @@ public class UserService {
         User user = findUser(mail);
         return user != null && user.getPassword().equals(password);
     }
+
+    public String getInfo(User user){
+        return "User{" +
+                "name='" + user.getName() + '\'' +
+                ", mail='" + user.getMail() + '\'' +
+                ", password='" + user.getPassword() + '\'' +
+                ", username='" +  user.getUsername() +
+                ", wallet=" + user.getWallet() +
+                '}';
+    }
+
 }
