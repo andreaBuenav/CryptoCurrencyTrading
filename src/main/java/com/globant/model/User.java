@@ -3,7 +3,7 @@ package com.globant.model;
 import java.math.BigDecimal;
 import java.util.Random;
 
-public class UserModel {
+public class User {
     private String name;
     private String mail;
     private String password;
@@ -36,5 +36,6 @@ public class UserModel {
         return username;
 
     }
+
 
 }
