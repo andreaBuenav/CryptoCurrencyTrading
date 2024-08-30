@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class Bitcoin extends CryptoCurrency{
     public Bitcoin(BigDecimal marketPrice){
-        super("BTC", CryptoCurrency.getPrice("BTC"));
+        super("BTC", marketPrice);
     }
 
 }
