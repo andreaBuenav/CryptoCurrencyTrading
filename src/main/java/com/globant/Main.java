@@ -1,17 +1,39 @@
 package com.globant;
+import com.globant.controller.CryptoStoreController;
+import com.globant.controller.WalletController;
+import com.globant.controller.UserAccountController;
+import com.globant.model.CryptoStore;
+import com.globant.services.WalletService;
+import com.globant.view.UserView;
+import com.globant.services.UserService;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+       //UserView
+        UserView userView = new UserView();
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
-        }
+        //Services:
+        UserService userService = new UserService();
+        WalletService walletService = new WalletService();
+        CryptoStore cryptoStore = new CryptoStore();
+
+        //Controllers
+        UserAccountController userAccountController = new UserAccountController(userView, userService);
+        WalletController walletController = new WalletController(userView, walletService);
+        CryptoStoreController cryptoStoreController = new CryptoStoreController(cryptoStore, userView);
+
+        //Calling setters
+        userView.setUserAccountController(userAccountController);
+        userView.setWalletController(walletController);
+        userView.setCryptoStoreController(cryptoStoreController);
+       //Initializing program:
+        userView.showInitialMenu();
+
+
+
+
+        
     }
 }
