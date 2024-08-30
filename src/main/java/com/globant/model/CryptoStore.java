@@ -34,7 +34,13 @@ public class CryptoStore {
     public BigDecimal getCrypto(CryptoCurrency crypto) {
         return cryptoStore.getOrDefault(crypto, BigDecimal.ZERO);
     }
-
+    public void showAvailableCryptos(){
+        System.out.println("Cryptocurrencies Available:");
+        for (Map.Entry<CryptoCurrency, BigDecimal> entry : CryptoStore.getCryptoStore().entrySet()) {
+            BigDecimal quantity = entry.getValue();
+            System.out.println(entry.getKey().getSymbol() + ": $" + entry.getKey().getMarketPrice() + " available: " +  quantity);
+        }
+    }
     public static Map<CryptoCurrency, BigDecimal> getCryptoStore() {
         return cryptoStore;
     }
