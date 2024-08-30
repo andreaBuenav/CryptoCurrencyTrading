@@ -1,5 +1,4 @@
 package com.globant;
-import com.globant.controller.CryptoStoreController;
 import com.globant.controller.WalletController;
 import com.globant.controller.UserAccountController;
 import com.globant.model.CryptoStore;
@@ -22,12 +21,11 @@ public class Main {
         //Controllers
         UserAccountController userAccountController = new UserAccountController(userView, userService);
         WalletController walletController = new WalletController(userView, walletService);
-        CryptoStoreController cryptoStoreController = new CryptoStoreController(cryptoStore, userView);
 
         //Calling setters
         userView.setUserAccountController(userAccountController);
         userView.setWalletController(walletController);
-        userView.setCryptoStoreController(cryptoStoreController);
+        userView.setCryptoStore(cryptoStore);
        //Initializing program:
         userView.showInitialMenu();
 
