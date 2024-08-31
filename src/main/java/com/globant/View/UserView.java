@@ -1,7 +1,7 @@
 package com.globant.view;
 import com.globant.controller.WalletController;
 import com.globant.controller.UserAccountController;
-import com.globant.model.CryptoStore;
+import com.globant.model.CryptoCurrencies.CryptoCurrency;
 import com.globant.model.exceptions.InsufficientFundsException;
 import com.globant.model.exceptions.InvalidInputException;
 import com.globant.services.UserService;
@@ -19,7 +19,7 @@ public class UserView {
     private final static Scanner s = new Scanner(System.in);
     private UserAccountController userAccountController;
     private WalletController walletController;
-    private CryptoStore  cryptoStore;
+    private CryptoCurrency crypto;
 
 
 
@@ -47,9 +47,7 @@ public class UserView {
     public void setWalletController(WalletController walletController) {
         this.walletController = walletController;
     }
-    public void setCryptoStore(CryptoStore cryptoStore){
-        this.cryptoStore = cryptoStore;
-    }
+
 
     //Menu principal
 private static final  Map<Integer, Runnable> mainMenuOptions = new HashMap<>();
@@ -109,10 +107,7 @@ private static final  Map<Integer, Runnable> mainMenuOptions = new HashMap<>();
         walletController.execute();
     }
 
-    public void purchaseCrypto(){
-        walletController.purchaseFromStore();
 
-    }
 
     public void sellCrypto(){
 
@@ -130,10 +125,9 @@ private static final  Map<Integer, Runnable> mainMenuOptions = new HashMap<>();
 //Login menu map values
 private void initLoginMenu(){
         loginMenu.put(1, this::deposit);
-        loginMenu.put(2, this::purchaseCrypto);
-        loginMenu.put(4, this::sellCrypto);
-        loginMenu.put(5, this ::showBalance);
-        loginMenu.put(6, this ::showTransactions);
+        loginMenu.put(2, this::sellCrypto);
+        loginMenu.put(4, this ::showBalance);
+        loginMenu.put(5, this ::showTransactions);
 
 }
 //login menu input
@@ -141,12 +135,11 @@ private void initLoginMenu(){
         while(true){
             System.out.println("\n\tWelcome! Please chose one option from the menu");
             System.out.println("1. Deposit");
-            System.out.println("2. Buy crypto from the store");
-            System.out.println("3. Buy crypto from traders");
-            System.out.println("4. Sell crypto ");
-            System.out.println("5. Show wallet balance");
-            System.out.println("6. Transactions history");
-            System.out.println("7. Log out");
+            System.out.println("2. Buy crypto ");
+            System.out.println("3. Sell crypto ");
+            System.out.println("4. Show wallet balance");
+            System.out.println("5. Transactions history");
+            System.out.println("6. Log out");
 
             String input = s.nextLine().trim();
             int choice = -1;
@@ -158,7 +151,7 @@ private void initLoginMenu(){
                 continue;
             }
 
-            if (choice == 7) {
+            if (choice == 6) {
                 break; //Getting out of the main menu
             } else if (loginMenu.containsKey(choice)) {
                 loginMenu.get(choice).run();
@@ -227,7 +220,7 @@ private void initLoginMenu(){
         }
     }
 
-    public BigDecimal getCryptoAmount(){
+    public BigDecimal getCryptoAmountInput(){
         System.out.println("Enter the amount you want to purchase: ");
         try{
             BigDecimal amount = s.nextBigDecimal();
@@ -237,12 +230,11 @@ private void initLoginMenu(){
             showInsufficientFundsError(e.getMessage());
             System.out.println(ANSI_GREEN + "**Going back to the menu**" + ANSI_RESET);
             s.nextLine();
-            return getCryptoAmount();
+            return getCryptoAmountInput();
         }
     }
 
-    public String getTypeOfCrypto(){
-        cryptoStore.showAvailableCryptos();
+    public String getTypeOfCryptoInput(){
         System.out.println("Select the crypto you want to purchase: ");
         System.out.println(" Bitcoin -> BTC" +
                 "\n Ethereum -> ETH" +
@@ -255,18 +247,40 @@ private void initLoginMenu(){
                 return symbol;
             } else {
                 System.out.println(ANSI_RED + "Crypto not available!" + ANSI_RESET);
-                getTypeOfCrypto();
+                getTypeOfCryptoInput();
         }
     }catch (InvalidInputException e){
                 showError(e.getMessage());
                 s.nextLine();
-                return getTypeOfCrypto();
+                return getTypeOfCryptoInput();
             }
             return symbol;
 }
 
+//First we need the marketPrice form each crypto
+    public void setCryptoCurrency(CryptoCurrency crypto) {
+        this.crypto = crypto;
+    }
 
-
+    //A crypto cannot be sold unless its price equals or is above 95% of the market price
+    public BigDecimal getCryptoPriceInput() {
+        System.out.println("Enter the price you want to sell the crypto for: ");
+        try {
+            BigDecimal inputPrice = s.nextBigDecimal();
+            s.nextLine();
+            BigDecimal marketPrice = crypto.getMarketPrice();
+            BigDecimal minPrice = marketPrice.multiply(new BigDecimal("0.95"));
+            if (inputPrice.compareTo(minPrice) < 0) {
+                System.out.println("Price must be at least 95% of the market price.");
+                return getCryptoPriceInput();
+            }
+            return inputPrice;
+        } catch (Exception e) {
+            System.out.println("Invalid input. Please enter a valid price.");
+            s.nextLine();
+            return getCryptoPriceInput();
+        }
+    }
 
 
     }
