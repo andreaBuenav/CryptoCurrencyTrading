@@ -30,6 +30,35 @@ public class UserService {
             User user = findUser(mail);
             return user != null && user.getPassword().equals(password);
         }
+
+
+    public String mailValidator(String mail)throws InvalidInputException {
+        if (!mail.contains("@") || !mail.endsWith(".com")) {
+            throw new InvalidInputException();
+        }
+        return mail;
     }
+
+        //Validating name
+
+        public String nameValidator (String name)throws InvalidInputException {
+            if (!name.matches("^[a-zA-Z ]+$")) {
+                throw new InvalidInputException();
+            }
+            return name;
+        }
+
+        // Validates if passwords that have been entered are correctly structured.
+        public String passwordValidator (String password)throws InvalidInputException {
+            String sc = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\[\\]{}|;':\",.<>?/]).+$";
+            if (!password.matches(sc)) {
+                throw new InvalidInputException();
+            }
+            return password;
+        }
+
+
+    }
+
 
 
