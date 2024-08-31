@@ -13,13 +13,13 @@ import java.util.Map;
 
 public class Wallet {
     private BigDecimal balance;
-    private static Map<CryptoCurrency, BigDecimal> cryptoWallet = new HashMap<>();
+    private  Map<CryptoCurrency, BigDecimal> cryptoWallet = new HashMap<>();
     //Initialize Wallet
 
     public Wallet(BigDecimal balance){
-        cryptoWallet.put(new Bitcoin(BigDecimal.ZERO), BigDecimal.ZERO);
-        cryptoWallet.put(new Ethereum(BigDecimal.ZERO),BigDecimal.ZERO);
-        cryptoWallet.put(new UltimaEcosystem(BigDecimal.ZERO),BigDecimal.ZERO);
+        cryptoWallet.put(new Bitcoin(BigDecimal.ZERO), new BigDecimal(50));
+        cryptoWallet.put(new Ethereum(BigDecimal.ZERO),new BigDecimal(50));
+        cryptoWallet.put(new UltimaEcosystem(BigDecimal.ZERO),new BigDecimal(50));
         this.balance = balance;
     }
 
@@ -27,19 +27,26 @@ public class Wallet {
 //Show balance
     public BigDecimal getBalance(){return balance;}
 
-    public static Map<CryptoCurrency, BigDecimal> getCryptoWallet() {
+    //Saves cryptos in the wallet
+    public  Map<CryptoCurrency, BigDecimal> getCryptoWallet() {
         return cryptoWallet;
     }
 
     //Deposit
-    public void addFounds(BigDecimal amount){
+    public void addFunds(BigDecimal amount){
          balance = balance.add(amount);
     }
 
     //add cryptos
-    public void addCrypto(CryptoCurrency crypto, BigDecimal amount){
-        cryptoWallet.put(crypto, cryptoWallet.get(crypto).add(amount));
+    public void addCrypto(CryptoCurrency crypto, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero.");
+        }
+        cryptoWallet.merge(crypto, amount, BigDecimal::add);
     }
+
+
+    //Updates balance every time a purchase is made
     public void removeFunds(BigDecimal amount) {
         if (balance.compareTo(amount) >= 0) {
             balance = balance.subtract(amount);
@@ -48,7 +55,6 @@ public class Wallet {
         }
 
     }
-
 
     public void removeCrypto(CryptoCurrency crypto, BigDecimal amount) {
         if (cryptoWallet.get(crypto).compareTo(amount) >= 0) {

@@ -1,6 +1,8 @@
 package com.globant.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class User {
@@ -9,16 +11,17 @@ public class User {
     private String password;
     private String username;
     private Wallet wallet;
+    private List<Transaction> transactionHistory = new ArrayList<>();
 
 
     public User(String name, String mail, String password){
         this.name = name;
         this.mail = mail;
         this.password = password;
-        this.username = UsernameGenerator(mail);
         this.wallet = new Wallet(BigDecimal.ZERO);
-    }
+        this.username = UsernameGenerator(mail);
 
+    }
 
 
     public String getName() {return name;}
@@ -26,6 +29,10 @@ public class User {
     public String getPassword() {return password;}
     public String getUsername(){return username;}
     public Wallet getWallet(){return wallet;}
+    public void setWallet(Wallet wallet) { this.wallet = wallet; }
+
+
+
 
     //Creates a user using the mail input before the '@' and adds random numbers at the end
     public  String UsernameGenerator( String email){
@@ -35,6 +42,19 @@ public class User {
         username = email.split("@")[0] + randomUser;
         return username;
 
+    }
+
+    public void addTransaction(Transaction transaction) {
+        this.transactionHistory.add(transaction);
+    }
+
+    public List<Transaction> getTransactionHistory() {
+        return transactionHistory;
+    }
+
+    //Shows transactions made
+    public List<Transaction> TransactionHistory() {
+        return new ArrayList<>(transactionHistory);
     }
 
 
