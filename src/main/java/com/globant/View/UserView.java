@@ -1,9 +1,10 @@
 package com.globant.view;
-import com.globant.controller.CryptoStoreController;
 import com.globant.controller.WalletController;
 import com.globant.controller.UserAccountController;
-import com.globant.model.User;
+import com.globant.model.CryptoStore;
+import com.globant.model.exceptions.InsufficientFundsException;
 import com.globant.model.exceptions.InvalidInputException;
+import com.globant.services.UserService;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ public class UserView {
     private final static Scanner s = new Scanner(System.in);
     private UserAccountController userAccountController;
     private WalletController walletController;
-    private CryptoStoreController  cryptoStoreController;
+    private CryptoStore  cryptoStore;
 
 
 
@@ -31,11 +32,14 @@ public class UserView {
     }
     public void showSuccess(){System.out.println( ANSI_GREEN + "Process successful!" + ANSI_RESET);
     }
+    public void showInsufficientFundsError(String errorMessage){System.out.println( ANSI_RED + "Insufficient" + ANSI_RESET);
+    }
 
     public UserView() {
         initMenu();
         initLoginMenu();
     }
+
 
     public void setUserAccountController(UserAccountController userAccountController) {
         this.userAccountController = userAccountController;
@@ -43,8 +47,8 @@ public class UserView {
     public void setWalletController(WalletController walletController) {
         this.walletController = walletController;
     }
-    public void setCryptoStoreController(CryptoStoreController cryptoStoreController){
-        this.cryptoStoreController = cryptoStoreController;
+    public void setCryptoStore(CryptoStore cryptoStore){
+        this.cryptoStore = cryptoStore;
     }
 
     //Menu principal
@@ -97,10 +101,10 @@ private static final  Map<Integer, Runnable> mainMenuOptions = new HashMap<>();
         }
     }
 
-    //Menu secundario
+    //Login menu
     private static final Map<Integer, Runnable> loginMenu = new HashMap<>();
-//Calling methods from WalletController
 
+    //Calling methods from WalletController
     public void deposit(){
         walletController.execute();
     }
@@ -123,7 +127,7 @@ private static final  Map<Integer, Runnable> mainMenuOptions = new HashMap<>();
     }
 
 
-
+//Login menu map values
 private void initLoginMenu(){
         loginMenu.put(1, this::deposit);
         loginMenu.put(2, this::purchaseCrypto);
@@ -132,7 +136,7 @@ private void initLoginMenu(){
         loginMenu.put(6, this ::showTransactions);
 
 }
-//login menu
+//login menu input
     public void loginMenu(){
         while(true){
             System.out.println("\n\tWelcome! Please chose one option from the menu");
@@ -172,7 +176,8 @@ private void initLoginMenu(){
         try{
             System.out.println("Enter your full name");
             String name = s.nextLine();
-            nameValidator(name);
+            UserService userService = new UserService();
+            userService.nameValidator(name);
             return name;
         }catch (InvalidInputException e){
             showError(e.getMessage());
@@ -185,7 +190,8 @@ private void initLoginMenu(){
         System.out.println("Enter your mail address");
         try{
             String mail = s.nextLine();
-            mailValidator(mail);
+            UserService userService = new UserService();
+            userService.mailValidator(mail);
             return mail;
         }catch (InvalidInputException e){
             showError(e.getMessage());
@@ -197,7 +203,8 @@ private void initLoginMenu(){
         System.out.println("Enter your password:");
         try{
             String password = s.nextLine();
-            passwordValidator(password);
+            UserService userService = new UserService();
+            userService.passwordValidator(password);
             return password;
         }catch (InvalidInputException e){
             showError(e.getMessage());
@@ -223,15 +230,19 @@ private void initLoginMenu(){
     public BigDecimal getCryptoAmount(){
         System.out.println("Enter the amount you want to purchase: ");
         try{
-           return s.nextBigDecimal();
-        }catch(InvalidInputException e){
-            showError(e.getMessage());
+            BigDecimal amount = s.nextBigDecimal();
+            s.nextLine();
+           return amount;
+        }catch(InsufficientFundsException e){
+            showInsufficientFundsError(e.getMessage());
+            System.out.println(ANSI_GREEN + "**Going back to the menu**" + ANSI_RESET);
+            s.nextLine();
             return getCryptoAmount();
         }
     }
 
     public String getTypeOfCrypto(){
-        cryptoStoreController.showAvailableCryptos();
+        cryptoStore.showAvailableCryptos();
         System.out.println("Select the crypto you want to purchase: ");
         System.out.println(" Bitcoin -> BTC" +
                 "\n Ethereum -> ETH" +
@@ -244,6 +255,7 @@ private void initLoginMenu(){
                 return symbol;
             } else {
                 System.out.println(ANSI_RED + "Crypto not available!" + ANSI_RESET);
+                getTypeOfCrypto();
         }
     }catch (InvalidInputException e){
                 showError(e.getMessage());
@@ -254,27 +266,14 @@ private void initLoginMenu(){
 }
 
 
-    // Validators
-    public static void nameValidator(String name)throws InvalidInputException {
-        if (!name.matches("^[a-zA-Z ]+$") ){
-            throw new InvalidInputException();
-        }
-    }
 
-    public static void mailValidator(String email)throws InvalidInputException {
-        if (!email.contains("@") || !email.endsWith(".com")){
-            throw new InvalidInputException();
-        }
-    }
 
-    // Validates if passwords that have been entered are correctly structured.
-    public static void passwordValidator(String password)throws InvalidInputException {
-        String sc = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\[\\]{}|;':\",.<>?/]).+$";
-        if (!password.matches(sc) ){
-            throw new InvalidInputException();}
+
     }
 
 
 
 
-}
+
+
+
