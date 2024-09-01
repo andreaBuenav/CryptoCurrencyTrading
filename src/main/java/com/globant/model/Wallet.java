@@ -4,6 +4,7 @@ import com.globant.model.CryptoCurrencies.Bitcoin;
 import com.globant.model.CryptoCurrencies.CryptoCurrency;
 import com.globant.model.CryptoCurrencies.Ethereum;
 import com.globant.model.CryptoCurrencies.UltimaEcosystem;
+import com.globant.model.exceptions.InsufficientCryptoException;
 import com.globant.model.exceptions.InsufficientFundsException;
 
 import java.math.BigDecimal;
@@ -32,38 +33,29 @@ public class Wallet {
         return cryptoWallet;
     }
 
-    //Deposit
-    public void addFunds(BigDecimal amount){
-         balance = balance.add(amount);
+    // Deposit
+    public void addFunds(BigDecimal amount) {
+        balance = balance.add(amount);
     }
 
-    //add cryptos
-    public void addCrypto(CryptoCurrency crypto, BigDecimal amount) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be greater than zero.");
-        }
-        cryptoWallet.merge(crypto, amount, BigDecimal::add);
-    }
-
-
-    //Updates balance every time a purchase is made
     public void removeFunds(BigDecimal amount) {
-        if (balance.compareTo(amount) >= 0) {
-            balance = balance.subtract(amount);
-        } else {
+        if (balance.compareTo(amount) < 0) {
             throw new InsufficientFundsException();
         }
+        balance = balance.subtract(amount);
+    }
 
+    public void addCrypto(CryptoCurrency crypto, BigDecimal amount) {
+        cryptoWallet.put(crypto, cryptoWallet.getOrDefault(crypto, BigDecimal.ZERO).add(amount));
     }
 
     public void removeCrypto(CryptoCurrency crypto, BigDecimal amount) {
-        if (cryptoWallet.get(crypto).compareTo(amount) >= 0) {
-            cryptoWallet.put(crypto, cryptoWallet.get(crypto).subtract(amount));
-        } else {
-            throw new InsufficientFundsException();
+        BigDecimal currentAmount = cryptoWallet.get(crypto);
+        if (currentAmount == null || currentAmount.compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient crypto balance.");
         }
+        cryptoWallet.put(crypto, currentAmount.subtract(amount));
     }
-
 
 
 
