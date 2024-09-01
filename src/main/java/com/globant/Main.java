@@ -1,7 +1,8 @@
 package com.globant;
 import com.globant.controller.WalletController;
 import com.globant.controller.UserAccountController;
-import com.globant.model.CryptoStore;
+import com.globant.model.Orders.Order;
+import com.globant.services.OrderService;
 import com.globant.services.WalletService;
 import com.globant.view.UserView;
 import com.globant.services.UserService;
@@ -16,16 +17,17 @@ public class Main {
         //Services:
         UserService userService = new UserService();
         WalletService walletService = new WalletService();
-        CryptoStore cryptoStore = new CryptoStore();
+        OrderService orderService = new OrderService();
+
 
         //Controllers
         UserAccountController userAccountController = new UserAccountController(userView, userService);
-        WalletController walletController = new WalletController(userView, walletService);
+        WalletController walletController = new WalletController(userView, walletService, orderService);
 
         //Calling setters
         userView.setUserAccountController(userAccountController);
         userView.setWalletController(walletController);
-        userView.setCryptoStore(cryptoStore);
+        userAccountController.setWalletController(walletController);
        //Initializing program:
         userView.showInitialMenu();
 
