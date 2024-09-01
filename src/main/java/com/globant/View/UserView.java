@@ -1,9 +1,10 @@
 package com.globant.view;
 import com.globant.controller.WalletController;
 import com.globant.controller.UserAccountController;
-import com.globant.model.CryptoStore;
+import com.globant.model.CryptoCurrencies.CryptoCurrency;
 import com.globant.model.exceptions.InsufficientFundsException;
 import com.globant.model.exceptions.InvalidInputException;
+import com.globant.services.OrderService;
 import com.globant.services.UserService;
 
 import java.math.BigDecimal;
@@ -19,7 +20,8 @@ public class UserView {
     private final static Scanner s = new Scanner(System.in);
     private UserAccountController userAccountController;
     private WalletController walletController;
-    private CryptoStore  cryptoStore;
+    private CryptoCurrency crypto;
+
 
 
 
@@ -35,8 +37,10 @@ public class UserView {
     public void showInsufficientFundsError(String errorMessage){System.out.println( ANSI_RED + "Insufficient" + ANSI_RESET);
     }
 
+    //Initializer
     public UserView() {
         initMenu();
+        initTradeMenu();
         initLoginMenu();
     }
 
@@ -47,15 +51,11 @@ public class UserView {
     public void setWalletController(WalletController walletController) {
         this.walletController = walletController;
     }
-    public void setCryptoStore(CryptoStore cryptoStore){
-        this.cryptoStore = cryptoStore;
-    }
+
+
 
     //Menu principal
 private static final  Map<Integer, Runnable> mainMenuOptions = new HashMap<>();
-
-
-
     //Calling Sign up and log in from User Controller
     public void signUp(){
        userAccountController.signUp();
@@ -103,20 +103,14 @@ private static final  Map<Integer, Runnable> mainMenuOptions = new HashMap<>();
 
     //Login menu
     private static final Map<Integer, Runnable> loginMenu = new HashMap<>();
-
+    public void trade(){
+       tradeMenu();
+    }
     //Calling methods from WalletController
     public void deposit(){
-        walletController.execute();
+        walletController.deposit();
     }
 
-    public void purchaseCrypto(){
-        walletController.purchaseFromStore();
-
-    }
-
-    public void sellCrypto(){
-
-    }
     public void showBalance(){
         System.out.println("Account Balance: \n" );
         walletController.balance();
@@ -130,10 +124,9 @@ private static final  Map<Integer, Runnable> mainMenuOptions = new HashMap<>();
 //Login menu map values
 private void initLoginMenu(){
         loginMenu.put(1, this::deposit);
-        loginMenu.put(2, this::purchaseCrypto);
-        loginMenu.put(4, this::sellCrypto);
-        loginMenu.put(5, this ::showBalance);
-        loginMenu.put(6, this ::showTransactions);
+        loginMenu.put(2, this::trade);
+        loginMenu.put(3, this ::showBalance);
+        loginMenu.put(4, this ::showTransactions);
 
 }
 //login menu input
@@ -141,12 +134,10 @@ private void initLoginMenu(){
         while(true){
             System.out.println("\n\tWelcome! Please chose one option from the menu");
             System.out.println("1. Deposit");
-            System.out.println("2. Buy crypto from the store");
-            System.out.println("3. Buy crypto from traders");
-            System.out.println("4. Sell crypto ");
-            System.out.println("5. Show wallet balance");
-            System.out.println("6. Transactions history");
-            System.out.println("7. Log out");
+            System.out.println("2. Trading menu ");
+            System.out.println("3. Show wallet balance");
+            System.out.println("4. Transactions history");
+            System.out.println("5. Log out");
 
             String input = s.nextLine().trim();
             int choice = -1;
@@ -158,7 +149,7 @@ private void initLoginMenu(){
                 continue;
             }
 
-            if (choice == 7) {
+            if (choice == 5) {
                 break; //Getting out of the main menu
             } else if (loginMenu.containsKey(choice)) {
                 loginMenu.get(choice).run();
@@ -169,6 +160,58 @@ private void initLoginMenu(){
 
     }
 
+
+
+    //Methods
+    public void buy(){
+        walletController.purchaseOrder();
+
+    }
+
+    public void sell(){
+    walletController.sellOrder();
+    }
+
+
+
+
+    //Trading menu
+    private static final Map<Integer, Runnable> tradeMenu = new HashMap<>();
+
+    private void initTradeMenu(){
+        tradeMenu.put(1, this::buy);
+        tradeMenu.put(2, this::sell);
+
+    }
+
+
+    public void tradeMenu() {
+        while (true) {
+            System.out.println("\n\t Please choose one option from the menu");
+            System.out.println("1. Buy cryptos");
+            System.out.println("2. Sell cryptos");
+            System.out.println("3. Back to login menu");
+
+
+            String input = s.nextLine();
+            int choice = -1;
+            try {
+                choice = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                showError("Invalid input. Please enter a number.");
+                continue;
+            }
+
+            if (choice == 3) {
+                break; // Exit the trade menu
+            } else if (tradeMenu.containsKey(choice)) {
+                tradeMenu.get(choice).run();
+            } else {
+                showError("Invalid option selected");
+                s.nextLine();
+            }
+        }
+    }
 
 
 //User inputs
@@ -227,46 +270,62 @@ private void initLoginMenu(){
         }
     }
 
-    public BigDecimal getCryptoAmount(){
-        System.out.println("Enter the amount you want to purchase: ");
-        try{
-            BigDecimal amount = s.nextBigDecimal();
-            s.nextLine();
-           return amount;
-        }catch(InsufficientFundsException e){
-            showInsufficientFundsError(e.getMessage());
-            System.out.println(ANSI_GREEN + "**Going back to the menu**" + ANSI_RESET);
-            s.nextLine();
-            return getCryptoAmount();
+    public BigDecimal getCryptoAmountInput() {
+        System.out.println("Enter an amount (e.g., 123.45): ");
+        while (true) {
+            try {
+                String input = s.nextLine();
+                BigDecimal amount = new BigDecimal(input);
+
+                if (amount.signum() < 0) {
+                    throw new IllegalArgumentException("Amount cannot be negative.");
+                }
+
+                return amount;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid amount format. Please enter a valid number.");
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+    public String getTypeOfCryptoInput() {
+        System.out.println("Select one type of crypto: ");
+        System.out.println(" Bitcoin -> BTC" +
+                "\n Ethereum -> ETH" +
+                "\n UltimaEcosystem -> ULTIMA");
+
+        String symbol = s.next().trim().toUpperCase();
+        s.nextLine();
+
+        if (symbol.equals("BTC") || symbol.equals("ETH") || symbol.equals("ULTIMA")) {
+            return symbol;
+        } else {
+            System.out.println(ANSI_RED + "Crypto not available or incorrect input!" + ANSI_RESET);
+            return getTypeOfCryptoInput();
         }
     }
 
-    public String getTypeOfCrypto(){
-        cryptoStore.showAvailableCryptos();
-        System.out.println("Select the crypto you want to purchase: ");
-        System.out.println(" Bitcoin -> BTC" +
-                "\n Ethereum -> ETH" +
-                "\n UltimaEcosystem -> ULTIMA " );
 
-            String symbol = s.next().trim().toUpperCase();
-            try{
-            if (symbol.equals("BTC") || symbol.equals("ETH") || symbol.equals("ULTIMA")){
-                s.nextLine();
-                return symbol;
-            } else {
-                System.out.println(ANSI_RED + "Crypto not available!" + ANSI_RESET);
-                getTypeOfCrypto();
+    //A crypto cannot be sold unless its price equals or is greater than 95% of the market price
+    public BigDecimal getCryptoPriceInput(CryptoCurrency crypto) {
+        BigDecimal marketPrice = crypto.getMarketPrice();
+        BigDecimal minPrice = marketPrice.multiply(new BigDecimal("0.95"));
+        System.out.println("Market Price: " + marketPrice);
+        System.out.println("Minimum Price (95% of Market Price): " + minPrice);
+        System.out.println("Enter an offer: ");
+        try {
+            BigDecimal inputPrice = s.nextBigDecimal();
+            System.out.println("Input Price: " + inputPrice);
+            OrderService orderService = new OrderService();
+            orderService.marketPriceValidator(inputPrice, crypto);
+            s.nextLine();
+            return inputPrice;
+        } catch (InvalidInputException e) {
+            System.out.println("Invalid input. Please enter a valid price.");
+            return getCryptoPriceInput(crypto);
         }
-    }catch (InvalidInputException e){
-                showError(e.getMessage());
-                s.nextLine();
-                return getTypeOfCrypto();
-            }
-            return symbol;
-}
-
-
-
+    }
 
 
     }
