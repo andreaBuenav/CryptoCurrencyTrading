@@ -6,7 +6,6 @@ import com.globant.model.Orders.SellOrder;
 import com.globant.model.Transaction;
 import com.globant.model.User;
 import com.globant.model.Wallet;
-import com.globant.model.exceptions.InsufficientCryptoException;
 import com.globant.model.exceptions.InsufficientFundsException;
 import com.globant.model.exceptions.InvalidInputException;
 
@@ -15,7 +14,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
+
+
 public class OrderService {
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_RESET = "\u001B[0m";
+
     private Queue<PurchaseOrder> purchaseOrders = new LinkedList<>();
     private Queue<SellOrder> sellOrders = new LinkedList<>();
 
@@ -109,5 +114,21 @@ public class OrderService {
             throw new InvalidInputException();
         }
     }
+    public void showSellOrders() {
+        if (sellOrders.isEmpty()) {
+            System.out.println(ANSI_RED + "No sell orders available." + ANSI_RESET);
+        } else {
+            System.out.println(ANSI_GREEN+ "--Current Sell Orders--" + ANSI_RESET);
+            for (SellOrder sellOrder : sellOrders) {
+                System.out.println("---------" );
+                System.out.println("\nUser: " + sellOrder.getUser().getUsername() +
+                        "\nCrypto: " + sellOrder.getCrypto().getSymbol() +
+                        "\nAmount: " + sellOrder.getAmount() +
+                        "\nTotal Price: $" + sellOrder.getPrice());
+                System.out.println("---------\n" );
+            }
+        }
+    }
+
 }
 

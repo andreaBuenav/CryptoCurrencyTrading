@@ -1,19 +1,15 @@
 package com.globant.controller;
 
 import com.globant.model.User;
-import com.globant.model.Wallet;
 import com.globant.services.UserService;
-import com.globant.services.WalletService;
 import com.globant.view.UserView;
 
-import java.math.BigDecimal;
 
 public class UserAccountController {
 private static final String ANSI_RED = "\u001B[31m";
 private static final String ANSI_GREEN = "\u001B[32m";
 private static final String ANSI_RESET = "\u001B[0m";
 private UserView userView;
-private User currentUser;
 private UserService userService;
 private WalletController walletController;
 
@@ -44,7 +40,7 @@ private WalletController walletController;
         System.out.println( "Username: " + newUser.getUsername() +
                 "\nName: " + newUser.getName() + '\''
                 );
-        System.out.println(ANSI_RED+ "**Going back to the main menu..**\n"+ ANSI_RESET);
+        System.out.println(ANSI_GREEN+ "--Going back to the main menu..--\n"+ ANSI_RESET);
 
 
          initializeMenu(userView);
@@ -62,9 +58,11 @@ private WalletController walletController;
             userView.showLogin();
             userView.loginMenu();
         } else {
-            System.out.println(ANSI_RED + "**Invalid mail or password**" + ANSI_RESET);
+            System.out.println(ANSI_RED + "Invalid mail or password" + ANSI_RESET);
             userView.showInitialMenu();
         }
+        userView.showSuccess();
+        System.out.println(ANSI_GREEN + "--Going back to the main menu--\n" + ANSI_RESET);
     }
 
 
