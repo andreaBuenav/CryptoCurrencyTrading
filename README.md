@@ -6,4 +6,4 @@ El userAccountController maneja el login y el registro.
 
 mini disclaimer: Puse que los depósitos sean realizados solo con enteros, sin embargo al realizar ventas si se disminuyen decimales en el balance.
 También los usuarios pueden vender criptos por partes, sin embargo estas cantidades no pueden ser menores o iguales a 0, es decir 0.5, 0.2 etc. No
-son oermitidos parala venta, pero 1.5, 4.6 etc, si son permitidos.
+son permitidos para la venta, pero 1.5, 4.6 etc, si son permitidos.
