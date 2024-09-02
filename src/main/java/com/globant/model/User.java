@@ -52,10 +52,7 @@ public class User {
         return transactionHistory;
     }
 
-    //Shows transactions made
-    public List<Transaction> TransactionHistory() {
-        return new ArrayList<>(transactionHistory);
-    }
+
 
 
 }

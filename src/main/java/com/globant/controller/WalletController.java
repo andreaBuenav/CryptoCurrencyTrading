@@ -32,7 +32,7 @@ public class WalletController {
 
 }
     protected void setCurrentUser(User user) {
-        this.user = user; // Set the current user
+        this.user = user;
     }
 
     public void deposit() {
@@ -45,7 +45,7 @@ public class WalletController {
         walletService.deposit(user, amount);
         System.out.println("Deposited " + amount + ". New balance: " + wallet.getBalance());
         userView.showSuccess();
-        System.out.println(ANSI_GREEN + "**Going back to the main menu**\n" + ANSI_RESET);
+        System.out.println(ANSI_GREEN + "--Going back to the main menu--\n" + ANSI_RESET);
     }
 
 
@@ -54,13 +54,15 @@ public class WalletController {
             System.out.println("No user is currently set.");
             return;
         }
-        Wallet wallet = user.getWallet(); // Get the user's wallet
+        Wallet wallet = user.getWallet();
         BigDecimal balance = wallet.getBalance();
         System.out.println("Current balance: $" + balance);
         System.out.println("Cryptocurrency balances:");
         for (Map.Entry<CryptoCurrency, BigDecimal> entry : wallet.getCryptoWallet().entrySet()) {
             System.out.println(entry.getKey().getSymbol() + ": " + entry.getValue());
         }
+        System.out.println(ANSI_GREEN + "--Going back to the main menu--\n" + ANSI_RESET);
+
 
     }
     public void purchaseOrder() {
@@ -78,6 +80,8 @@ public class WalletController {
         orderService.addBuyOrder(purchaseOrder);
 
         System.out.println("Buy order placed for " + amount + " " + cryptoSymbol + " at $" + price);
+        userView.showSuccess();
+        System.out.println(ANSI_GREEN + "--Going back to the main menu--\n" + ANSI_RESET);
     }
 
     public void sellOrder() {
@@ -94,6 +98,8 @@ public class WalletController {
         SellOrder sellOrder = new SellOrder(user, crypto, amount, price);
         orderService.addSellOrder(sellOrder);
         System.out.println("Sell order placed for " + amount + " " + cryptoSymbol + " at $" + price);
+        userView.showSuccess();
+        System.out.println(ANSI_GREEN + "--Going back to the main menu--\n" + ANSI_RESET);
     }
 
 
@@ -104,6 +110,7 @@ public class WalletController {
             transaction.check();
         }
     }
+
 }
 
 

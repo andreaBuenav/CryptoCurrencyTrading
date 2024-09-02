@@ -27,6 +27,7 @@ public class Main {
         //Calling setters
         userView.setUserAccountController(userAccountController);
         userView.setWalletController(walletController);
+        userView.setOrderService(orderService);
         userAccountController.setWalletController(walletController);
        //Initializing program:
         userView.showInitialMenu();
