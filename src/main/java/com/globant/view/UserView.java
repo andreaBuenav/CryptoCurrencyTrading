@@ -195,6 +195,7 @@ private void initLoginMenu(){
         tradeMenu.put(1, this::buy);
         tradeMenu.put(2, this::sell);
         tradeMenu.put(3, this::ShowSellOrders);
+        tradeMenu.put(4, this::loginMenu);
 
     }
 
@@ -217,7 +218,6 @@ private void initLoginMenu(){
                 showError("Invalid input. Please enter a number.");
                 continue;
             }
-
             if (choice == 4) {
                 break; // Exit the trade menu
             } else if (tradeMenu.containsKey(choice)) {
@@ -331,7 +331,7 @@ private void initLoginMenu(){
         BigDecimal minPrice = marketPrice.multiply(new BigDecimal("0.95"));
         System.out.println("Market Price: " + marketPrice);
         System.out.println("Minimum Price (95% of Market Price): " + minPrice);
-        System.out.println("Enter an offer: ");
+        System.out.println("Enter an offer for each crypto: ");
         try {
             BigDecimal inputPrice = s.nextBigDecimal();
             System.out.println("Input Price: " + inputPrice);

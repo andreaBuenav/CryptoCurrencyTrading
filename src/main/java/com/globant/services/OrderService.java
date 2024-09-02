@@ -48,14 +48,12 @@ public class OrderService {
     }
 
     private boolean canExecuteOrder(PurchaseOrder purchaseOrder, SellOrder sellOrder) {
-        return purchaseOrder.getAmount().compareTo(sellOrder.getAmount()) >= 0
-                && purchaseOrder.getPrice().compareTo(sellOrder.getPrice()) >= 0;
+        return purchaseOrder.getPrice().compareTo(sellOrder.getPrice()) >= 0;
     }
 
     private void executeOrder(PurchaseOrder purchaseOrder, SellOrder sellOrder) {
         BigDecimal tradeAmount = sellOrder.getAmount().min(purchaseOrder.getAmount());
-        BigDecimal tradePrice = sellOrder.getPrice().divide(sellOrder.getAmount(), RoundingMode.HALF_UP); // Precio por unidad
-
+        BigDecimal tradePrice = sellOrder.getPrice(); // Assuming the sell order price is the unit price
 
         User buyer = purchaseOrder.getUser();
         User seller = sellOrder.getUser();
@@ -66,21 +64,25 @@ public class OrderService {
         BigDecimal totalCost = tradeAmount.multiply(tradePrice);
 
         if (buyerBalance.compareTo(totalCost) >= 0) {
+            // Perform the trade
             buyerWallet.removeFunds(totalCost);
             sellerWallet.addFunds(totalCost);
 
             buyerWallet.addCrypto(purchaseOrder.getCrypto(), tradeAmount);
             sellerWallet.removeCrypto(sellOrder.getCrypto(), tradeAmount);
 
+            // Record the transaction
             Transaction buyTransaction = new Transaction("BUY", seller.getUsername(), purchaseOrder.getCrypto(), tradeAmount, tradePrice, buyer.getUsername());
             Transaction sellTransaction = new Transaction("SELL", buyer.getUsername(), sellOrder.getCrypto(), tradeAmount, tradePrice, seller.getUsername());
 
             buyer.addTransaction(buyTransaction);
             seller.addTransaction(sellTransaction);
 
-            notifyUser(buyer, "Purchase completed: " + tradeAmount + " " + purchaseOrder.getCrypto().getSymbol() + " at unitary price: $" + tradePrice);
-            notifyUser(seller, "Sale completed: " + tradeAmount + " " + sellOrder.getCrypto().getSymbol() + " at at unitary price $" + tradePrice);
+            // Notify users
+            notifyUser(buyer, "Purchase completed: " + tradeAmount + " " + purchaseOrder.getCrypto().getSymbol() + " at total price: $" + tradePrice);
+            notifyUser(seller, "Sale completed: " + tradeAmount + " " + sellOrder.getCrypto().getSymbol() + " at total price: $" + tradePrice);
 
+            // Update order amounts
             if (purchaseOrder.getAmount().compareTo(tradeAmount) == 0) {
                 purchaseOrders.poll();
             } else {
